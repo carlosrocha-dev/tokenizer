@@ -1,8 +1,8 @@
-# NOMAD42 Project – Deployment Guide
+# IMERSIVUS42 Project – Deployment Guide
 
 ## 1. Prerequisites
 
-Before deploying the NOMAD42 Project contracts, ensure the following:
+Before deploying the IMERSIVUS42 Project contracts, ensure the following:
 
 * **MetaMask** installed and configured for **BNB Smart Chain Testnet**.
 * **Remix IDE** ([remix.ethereum.org](https://remix.ethereum.org)) ready.
@@ -14,7 +14,7 @@ Before deploying the NOMAD42 Project contracts, ensure the following:
 
 1. Open Remix IDE and upload the following contracts under `code/`:
 
-   * `NOMAD42Token.sol`
+   * `IMERSIVUS42Token.sol`
    * `MockOracle.sol`
    * `FuturesExchange.sol`
 
@@ -32,7 +32,7 @@ Before deploying the NOMAD42 Project contracts, ensure the following:
 
 ### Step 1 – Deploy Token
 
-* Deploy `NOMAD42Token` with no constructor arguments.
+* Deploy `IMERSIVUS42Token` with no constructor arguments.
 * Copy the deployed **token address**.
 * Add token to MetaMask (Custom Token → paste address).
 
@@ -66,7 +66,7 @@ For each contract (Token, Oracle, Exchange):
 
 ## 5. Post-Deployment Checklist
 
-* ✅ Token shows correct name (`NOMAD42 Token`) and ticker (`NOMAD42`).
+* ✅ Token shows correct name (`IMERSIVUS42 Token`) and ticker (`IMERSIVUS42`).
 * ✅ Oracle initialized with expected price.
 * ✅ Exchange linked to Token + Oracle addresses.
 * ✅ All three contracts verified on BscScan.

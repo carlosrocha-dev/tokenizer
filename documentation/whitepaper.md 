@@ -1,8 +1,8 @@
-# NOMAD42 Project – Whitepaper
+# IMERSIVUS42 Project – Whitepaper
 
 ## 1. Introduction
 
-The **NOMAD42 Project** is a minimalistic prototype of a futures exchange deployed on the **BNB Smart Chain Testnet**. It demonstrates how an ERC‑20 token, a price oracle, and an exchange contract can interact to create a simplified environment for futures trading.
+The **IMERSIVUS42 Project** is a minimalistic prototype of a futures exchange deployed on the **BNB Smart Chain Testnet**. It demonstrates how an ERC‑20 token, a price oracle, and an exchange contract can interact to create a simplified environment for futures trading.
 
 This project is **educational in nature**, designed to showcase smart contract design, deployment, verification, and interaction with blockchain explorers and wallets.
 
@@ -10,11 +10,11 @@ This project is **educational in nature**, designed to showcase smart contract d
 
 ## 2. System Components
 
-### 2.1 NOMAD42Token
+### 2.1 IMERSIVUS42Token
 
 * **Type:** ERC‑20 token based on OpenZeppelin libraries.
-* **Ticker:** NOMAD42
-* **Supply:** 21,000,000 NOMAD42 minted at deployment.
+* **Ticker:** IMERSIVUS42
+* **Supply:** 21,000,000 IMERSIVUS42 minted at deployment.
 * **Role:** Provides the currency used for deposits, positions, and withdrawals in the exchange.
 
 ### 2.2 MockOracle
@@ -28,7 +28,7 @@ This project is **educational in nature**, designed to showcase smart contract d
 * **Purpose:** Core trading contract.
 * **Features:**
 
-  * Deposit NOMAD42 tokens.
+  * Deposit IMERSIVUS42 tokens.
   * Open a **long** or **short** futures position.
   * Close positions to calculate **profit/loss (PnL)** based on price changes.
   * Withdraw available balance back to wallet.
@@ -41,16 +41,16 @@ This project is **educational in nature**, designed to showcase smart contract d
 1. **Wallet Setup**
 
    * Configure MetaMask for **BNB Testnet**.
-   * Add the deployed **NOMAD42Token**.
+   * Add the deployed **IMERSIVUS42Token**.
 
 2. **Funding**
 
    * Acquire **Test BNB** from a faucet for gas fees.
-   * Request NOMAD42 tokens if distribution is enabled.
+   * Request IMERSIVUS42 tokens if distribution is enabled.
 
 3. **Deposits and Approvals**
 
-   * Use `approve` to allow the Exchange to spend NOMAD42.
+   * Use `approve` to allow the Exchange to spend IMERSIVUS42.
    * Call `deposit` to transfer funds into the Exchange.
 
 4. **Trading**
@@ -67,7 +67,7 @@ This project is **educational in nature**, designed to showcase smart contract d
 
 ## 4. Smart Contract Addresses
 
-* **Token (NOMAD42Token):** `0x37D1fD58Cd90e08D7D3F7b8C7aFD7d7EB03f49Fe`
+* **Token (IMERSIVUS42Token):** `0x37D1fD58Cd90e08D7D3F7b8C7aFD7d7EB03f49Fe`
 * **Oracle (MockOracle):** `0xCD13df8AfCEd2a2E6Cd860c9101b3284Eb0bA7A3`
 * **Exchange (FuturesExchange):** `0x1F899A82f6d7235C72E779c8AcCEefD42bbd041c`
 
@@ -96,7 +96,7 @@ This project is **educational in nature**, designed to showcase smart contract d
 
 ## 7. Conclusion
 
-The **NOMAD42 Project** illustrates a minimal futures market on blockchain:
+The **IMERSIVUS42 Project** illustrates a minimal futures market on blockchain:
 
 * ERC‑20 token creation
 * Oracle integration

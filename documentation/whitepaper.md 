@@ -1,0 +1,107 @@
+# NOMAD42 Project – Whitepaper
+
+## 1. Introduction
+
+The **NOMAD42 Project** is a minimalistic prototype of a futures exchange deployed on the **BNB Smart Chain Testnet**. It demonstrates how an ERC‑20 token, a price oracle, and an exchange contract can interact to create a simplified environment for futures trading.
+
+This project is **educational in nature**, designed to showcase smart contract design, deployment, verification, and interaction with blockchain explorers and wallets.
+
+---
+
+## 2. System Components
+
+### 2.1 NOMAD42Token
+
+* **Type:** ERC‑20 token based on OpenZeppelin libraries.
+* **Ticker:** NOMAD42
+* **Supply:** 21,000,000 NOMAD42 minted at deployment.
+* **Role:** Provides the currency used for deposits, positions, and withdrawals in the exchange.
+
+### 2.2 MockOracle
+
+* **Purpose:** Supplies a simulated asset price (manually updated by the owner).
+* **Usage:** Price is expressed as an integer with 8 decimal places (e.g., `100000000` = 1.0).
+* **Role:** Serves as the market price feed for futures contracts.
+
+### 2.3 FuturesExchange
+
+* **Purpose:** Core trading contract.
+* **Features:**
+
+  * Deposit NOMAD42 tokens.
+  * Open a **long** or **short** futures position.
+  * Close positions to calculate **profit/loss (PnL)** based on price changes.
+  * Withdraw available balance back to wallet.
+* **Margin Discount:** 80% of the deposited amount is used as effective margin.
+
+---
+
+## 3. Workflow
+
+1. **Wallet Setup**
+
+   * Configure MetaMask for **BNB Testnet**.
+   * Add the deployed **NOMAD42Token**.
+
+2. **Funding**
+
+   * Acquire **Test BNB** from a faucet for gas fees.
+   * Request NOMAD42 tokens if distribution is enabled.
+
+3. **Deposits and Approvals**
+
+   * Use `approve` to allow the Exchange to spend NOMAD42.
+   * Call `deposit` to transfer funds into the Exchange.
+
+4. **Trading**
+
+   * Open position via `openPosition(isLong, amount)`.
+   * Update oracle price using `setPrice` to simulate market movement.
+   * Close position via `closePosition` to realize PnL.
+
+5. **Withdrawals**
+
+   * Call `withdraw(amount)` to return tokens from the Exchange to wallet.
+
+---
+
+## 4. Smart Contract Addresses
+
+* **Token (NOMAD42Token):** `0x37D1fD58Cd90e08D7D3F7b8C7aFD7d7EB03f49Fe`
+* **Oracle (MockOracle):** `0xCD13df8AfCEd2a2E6Cd860c9101b3284Eb0bA7A3`
+* **Exchange (FuturesExchange):** `0x1F899A82f6d7235C72E779c8AcCEefD42bbd041c`
+
+(All verified on [BscScan Testnet](https://testnet.bscscan.com))
+
+---
+
+## 5. Technical Specifications
+
+* **Language:** Solidity ^0.8.20
+* **Compiler:** v0.8.20+commit.a1b79de6
+* **EVM Version:** Shanghai
+* **Optimizer:** Disabled, runs = 200
+* **Dependencies:** OpenZeppelin ERC‑20
+
+---
+
+## 6. Security Notes
+
+* This system is **not production‑ready**.
+* Oracle prices are manually controlled (centralized and insecure for real use).
+* No liquidation, leverage, or advanced margin management.
+* Educational scope: demonstrates mechanics, not production safety.
+
+---
+
+## 7. Conclusion
+
+The **NOMAD42 Project** illustrates a minimal futures market on blockchain:
+
+* ERC‑20 token creation
+* Oracle integration
+* Futures contract logic
+* Verification on a block explorer
+
+It can serve as a foundation for learning **DeFi concepts**, smart contract workflows, and project validation for academic or educational purposes.
+

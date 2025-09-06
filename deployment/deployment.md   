@@ -1,0 +1,85 @@
+# NOMAD42 Project – Deployment Guide
+
+## 1. Prerequisites
+
+Before deploying the NOMAD42 Project contracts, ensure the following:
+
+* **MetaMask** installed and configured for **BNB Smart Chain Testnet**.
+* **Remix IDE** ([remix.ethereum.org](https://remix.ethereum.org)) ready.
+* **Test BNB** from [BNB Faucet](https://testnet.bnbchain.org/faucet-smart) for gas fees.
+
+---
+
+## 2. Compilation
+
+1. Open Remix IDE and upload the following contracts under `code/`:
+
+   * `NOMAD42Token.sol`
+   * `MockOracle.sol`
+   * `FuturesExchange.sol`
+
+2. Go to the **Solidity Compiler** tab:
+
+   * Compiler Version: `0.8.20`
+   * EVM Version: `Shanghai`
+   * Enable/disable optimizer according to your preference (original deployment used **disabled**).
+
+3. Click **Compile** for each contract. Ensure no errors appear.
+
+---
+
+## 3. Deployment Order
+
+### Step 1 – Deploy Token
+
+* Deploy `NOMAD42Token` with no constructor arguments.
+* Copy the deployed **token address**.
+* Add token to MetaMask (Custom Token → paste address).
+
+### Step 2 – Deploy Oracle
+
+* Deploy `MockOracle` with an initial price parameter (e.g., `100000000` for 1.0 with 8 decimals).
+* Copy the deployed **oracle address**.
+
+### Step 3 – Deploy Exchange
+
+* Deploy `FuturesExchange` with constructor arguments:
+
+  1. Token address
+  2. Oracle address
+* Copy the deployed **exchange address**.
+
+---
+
+## 4. Verification on BscScan
+
+For each contract (Token, Oracle, Exchange):
+
+1. Go to [BscScan Testnet](https://testnet.bscscan.com).
+2. Search for the contract address.
+3. Select **Contract → Verify and Publish**.
+4. Use the same compiler version and optimizer settings.
+5. Paste the source code or upload the compilation JSON (`Compilation Details → Copy as Input JSON`).
+6. Once verified, contracts will appear **readable and verified** on the explorer.
+
+---
+
+## 5. Post-Deployment Checklist
+
+* ✅ Token shows correct name (`NOMAD42 Token`) and ticker (`NOMAD42`).
+* ✅ Oracle initialized with expected price.
+* ✅ Exchange linked to Token + Oracle addresses.
+* ✅ All three contracts verified on BscScan.
+* ✅ Contract addresses documented in `README.md`.
+
+---
+
+## 6. Useful Links
+
+* **Remix IDE:** [https://remix.ethereum.org](https://remix.ethereum.org)
+* **BNB Faucet (Testnet):** [https://testnet.bnbchain.org/faucet-smart](https://testnet.bnbchain.org/faucet-smart)
+* **BscScan Testnet:** [https://testnet.bscscan.com](https://testnet.bscscan.com)
+
+---
+
+📖 For functionality and interaction, see [whitepaper.md](./whitepaper.md).

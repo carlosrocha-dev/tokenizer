@@ -1,18 +1,20 @@
-contract MockOracle {
-    address public owner;
-    uint256 public price; // Ex: preço do par BRL/TRY com 8 casas decimais
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
 
-    constructor(uint256 initialPrice) {
-        owner = msg.sender;
-        price = initialPrice;
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.2/contracts/access/Ownable.sol";
+
+contract MockOracle is Ownable {
+    uint256 private _price; // scaled 1e18
+
+    constructor(uint256 initialPrice) Ownable(msg.sender) {
+        _price = initialPrice;
     }
 
-    function setPrice(uint256 newPrice) external {
-        require(msg.sender == owner, "Only owner can set price");
-        price = newPrice;
+    function setPrice(uint256 newPrice) external onlyOwner {
+        _price = newPrice;
     }
 
     function getPrice() external view returns (uint256) {
-        return price;
+        return _price;
     }
 }

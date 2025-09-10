@@ -1,84 +1,53 @@
-# IMERSIVUS42 Project – BNB Testnet
+# IMERSIVUS42 Project — BNB Smart Chain **Testnet**
 
-## 📌 Contracts Deployed
-
-* **Token (IMERSIVUS42Token)**
-
-  * Name: `IMERSIVUS42 Token`
-  * Symbol: `IMERSIVUS42`
-  * Standard: ERC-20
-  * Initial Supply: 21,000,000 IMERSIVUS42
-  * **Address:** `0x37D1fD58Cd90e08D7D3F7b8C7aFD7d7EB03f49Fe`
-  * [View on BscScan](https://testnet.bscscan.com/address/0x37D1fD58Cd90e08D7D3F7b8C7aFD7d7EB03f49Fe#code)
-
-* **Oracle (MockOracle)**
-
-  * Purpose: Provides simulated price feed (set manually by owner).
-  * Initial Price: `100000000` (interpreted as 1.0 with 8 decimals).
-  * **Address:** `0xCD13df8AfCEd2a2E6Cd860c9101b3284Eb0bA7A3`
-  * [View on BscScan](https://testnet.bscscan.com/address/0xCD13df8AfCEd2a2E6Cd860c9101b3284Eb0bA7A3#code)
-
-* **Exchange (FuturesExchange)**
-
-  * Purpose: Simple futures market with deposits, open/close positions, and withdrawals using IMERSIVUS42Token.
-  * Depends on: Token + Oracle addresses.
-  * **Address:** `0x1F899A82f6d7235C72E779c8AcCEefD42bbd041c`
-  * [View on BscScan](https://testnet.bscscan.com/address/0x1F899A82f6d7235C72E779c8AcCEefD42bbd041c#code)
+> Projeto educacional (42 + BNB Chain) demonstrando um token **BEP-20 (ERC-20-compatible)**, um **oracle** simples e uma **mini-exchange** para abrir/fechar posições e calcular P/L.
+> Rede: **BSC Testnet (ChainID 97)** — use **tBNB** do faucet para pagar gás.
 
 ---
 
-## 🌐 Network
+## 📦 Contratos Implantados (Testnet)
 
-* **Blockchain:** BNB Smart Chain Testnet
-* **Explorer Root:** [https://testnet.bscscan.com](https://testnet.bscscan.com)
+### 1) Token — `IMERSIVUS42Token`
 
----
+* **Name:**`IMERSIVUS42 Token`
+* **Symbol:**`IMERSIVUS42`
+* **Standard:****BEP-20 (ERC-20-compatible)**
+* **Decimals:**`18`
+* **Initial Supply (em tokens):**`21,000,000 IMERSIVUS42`
+* **Initial Supply (on-chain / 18 casas):**`21000000 * 10^18`
+* **Address:**`0x93783d7E8097cba710922e9997aA1759C34A4618`
+  * Explorer: [https://testnet.bscscan.com/address/0x93783d7E8097cba710922e9997aA1759C34A4618]()
 
-## 🛠 How to Use
+### 2) Oracle — `MockOracle`
 
-1. Add **IMERSIVUS42 token** to MetaMask using the **Token Address** above.
-2. Approve spending of IMERSIVUS42 to the **Exchange** contract (`approve`).
-3. Deposit tokens into the Exchange (`deposit`).
-4. Open a long/short position (`openPosition(isLong, amount)`).
-5. Update Oracle price with `setPrice` to simulate market movement.
-6. Close the position (`closePosition`) to realize profit/loss.
-7. Withdraw tokens back to your wallet (`withdraw`).
+* **Função:** feed de preço definido pelo **owner** (didático).
+* **Escala recomendada:**`1e18` (ex.: 2,000.00 → `2000 * 1e18`)
+* **Address:**`0xE769449D1Ed5d4F6E7e2DB220DEe01b22554b979`
+  * Explorer: [https://testnet.bscscan.com/address/0xE769449D1Ed5d4F6E7e2DB220DEe01b22554b979]()
 
----
+### 3) Exchange — `FuturesExchange`
 
-## 📖 Documentation
-
-* **Whitepaper:** [documentation/whitepaper.md](documentation/whitepaper.md)
-* Explains:
-
-  * Project overview
-  * Step-by-step usage
-  * Security notes & limitations
-  * Deployed addresses and references
+* **Função:** depósito/saque, abertura/fechamento de posição e cálculo de P/L com base no oracle.
+* **Depende de:** Token + Oracle.
+* **Address:**`0xF38ca9Ef40cc666Adad33E983121c1bdFE81383D`
+  * Explorer: [https://testnet.bscscan.com/address/0xF38ca9Ef40cc666Adad33E983121c1bdFE81383D]()
 
 ---
 
-## ⚙️ Development & Deployment
+## 🌐 Rede
 
-* **Compiler Version:** `v0.8.20+commit.a1b79de6`
-* **EVM Version:** Shanghai
-* **Optimizer:** Disabled (consistent with deployment)
-* **Runs:** 200
-* **Tooling:** Remix Ethereum IDE
-* **Libraries:** OpenZeppelin Contracts
-
-Deployment details can be found in [deployment/README.md](deployment/README.md).
+* **Blockchain:** BNB Smart Chain **Testnet** (ChainID **97**)
+* **Moeda de gás:**`tBNB` (faucet)
+* **Explorer:**[https://testnet.bscscan.com](https://testnet.bscscan.com?utm_source=chatgpt.com)
 
 ---
 
-## ✅ Checklist
+## ⚙️ Desenvolvimento & Deploy
 
-* [x] All 3 contracts deployed on **BNB Smart Chain Testnet**
-* [x] Source code verified on **BscScan** (see links above)
-* [x] Token contains **“42”** in its name and **symbol IMERSIVUS42**
-* [x] Documentation prepared (whitepaper, usage instructions)
-* [x] Demonstration workflow reproducible: approve → deposit → open → setPrice → close → withdraw
+* **IDE:** Remix (Injected Provider – MetaMask, BSC Testnet)
+* **Compiler:**`Solidity 0.8.20`
+* **EVM:** Shanghai
+* **Optimizer:****Disabled** (consistente com o deploy) — *se habilitar, documente `runs`*
+* **Libs:** OpenZeppelin Contracts
 
----
-
-🚀 **IMERSIVUS42** demonstrates a minimal futures exchange prototype, powered by a custom ERC-20 token, a mock oracle, and an exchange contract for educational purposes.
+Arquivos de apoio em `deployment/` (passo a passo e verificação no explorer).

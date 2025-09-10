@@ -67,9 +67,9 @@ This project is **educational in nature**, designed to showcase smart contract d
 
 ## 4. Smart Contract Addresses
 
-* **Token (IMERSIVUS42Token):** `0x37D1fD58Cd90e08D7D3F7b8C7aFD7d7EB03f49Fe`
-* **Oracle (MockOracle):** `0xCD13df8AfCEd2a2E6Cd860c9101b3284Eb0bA7A3`
-* **Exchange (FuturesExchange):** `0x1F899A82f6d7235C72E779c8AcCEefD42bbd041c`
+* **Token (IMERSIVUS42Token):** `0x93783d7E8097cba710922e9997aA1759C34A4618`
+* **Oracle (MockOracle):** `0xE769449D1Ed5d4F6E7e2DB220DEe01b22554b979`
+* **Exchange (FuturesExchange):** `0xF38ca9Ef40cc666Adad33E983121c1bdFE81383D`
 
 (All verified on [BscScan Testnet](https://testnet.bscscan.com))
 

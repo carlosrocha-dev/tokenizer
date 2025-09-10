@@ -1,0 +1,341 @@
+diff --git a/README.md b/README.md
+index 1111111..2222222 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,32 @@
+ # IMERSIVUS42 Token
+ 
+-Standard: ERC-20
++Standard: **BEP-20 (ERC-20-compatible)**
++
++## Multisig (BÔNUS)
++Este projeto inclui um contrato `MultisigWallet` (M-de-N) para proteger operações
++administrativas (ex.: `transferOwnership`, `setPrice` do Oracle, `pause`, `mint`, etc.).
++
++### Como usar
++1. Faça o deploy de `MultisigWallet`, informando:
++   - `owners`: lista de endereços (ex.: 3 owners)
++   - `required`: mínimo de confirmações (ex.: 2)
++2. Transfira o ownership dos contratos **Ownable** para o endereço do multisig:
++   - `token.transferOwnership(<multisig>)`
++   - `oracle.transferOwnership(<multisig>)`
++   - (outros contratos Ownable, se existirem)
++3. Para executar uma função sensível (ex.: `oracle.setPrice(…)`):
++   - Monte o `data` com a assinatura da função (ABI) e chame:
++     `submitTransaction(to=<endereço do contrato>, value=0, data=<calldata>)`
++   - Outros owners confirmam com `confirmTransaction(txId)`.
++   - Após atingir `required`, execute com `executeTransaction(txId)`.
++
++> Vantagens: reduz risco de chave única, cumpre o bônus do subject e facilita auditoria.
++
++### Observação
++Se você estiver usando apenas Remix:
++– Utilize a aba “Deploy & Run” p/ deployar `MultisigWallet`,
++– cole o endereço do multisig nos contratos `Ownable` com `transferOwnership`.
++Passos completos em `deployment/MULTISIG.md`.
+ 
+ ## Endereços (Testnet)
+ - Token: `<address>`
+diff --git a/deployment/MULTISIG.md b/deployment/MULTISIG.md
+new file mode 100644
+index 0000000..3333333
+--- /dev/null
++++ b/deployment/MULTISIG.md
+@@ -0,0 +1,120 @@
++# Multisig (Bônus) – Guia de Deploy e Uso
++
++## 1) Deploy
++Contrato: `code/MultisigWallet.sol`
++
++Parâmetros:
++- `owners`: array de endereços (ex.: `[0xAAA..., 0xBBB..., 0xCCC...]`)
++- `required`: número mínimo de confirmações (ex.: `2`)
++
++### Remix (sem Hardhat)
++1. Compile `MultisigWallet.sol` (0.8.20+).
++2. Deploy com os parâmetros acima.
++3. Guarde o endereço do multisig.
++
++## 2) Transferir Ownership dos contratos Ownable
++Para cada contrato `Ownable` (ex.: Token, Oracle, Exchange):
++```
++transferOwnership(<endereço_do_multisig>)
++```
++Confirme no explorer (BscScan Testnet) que `owner()` passou a ser o multisig.
++
++## 3) Executar uma função via Multisig
++Exemplo: `MockOracle.setPrice(uint256 newPrice)`
++
++**Montando o calldata (ABI)**
++No Remix → abas “ABI”/“At Address” (ou usando web3/ethers), gere:
++- function selector de `setPrice(uint256)`
++- encode do parâmetro `newPrice`
++
++**Fluxo**
++1. `submitTransaction(to=<Oracle>, value=0, data=<calldata>)`
++2. Outro(s) owner(s) fazem `confirmTransaction(txId)`
++3. `executeTransaction(txId)` (quando `required` for atingido)
++
++## 4) Boas práticas
++- Mantenha `required` < `owners.length` e >= 2 para segurança.
++- Adicione/Remova owners somente quando necessário.
++- Documente cada `txId` (quem propôs, quem confirmou, propósito).
+diff --git a/code/MultisigWallet.sol b/code/MultisigWallet.sol
+new file mode 100644
+index 0000000..4444444
+--- /dev/null
++++ b/code/MultisigWallet.sol
+@@ -0,0 +1,248 @@
++// SPDX-License-Identifier: MIT
++pragma solidity ^0.8.20;
++
++/// @title MultisigWallet (M-de-N) simples para governança administrativa
++/// @notice Permite submeter, confirmar e executar transações arbitrárias (call)
++///         somente após atingir o número mínimo de confirmações `required`.
++/// @dev    Foco didático para o bônus do subject. Sem suporte a ETH custody.
++contract MultisigWallet {
++    /*//////////////////////////////////////////////////////////////
++                                EVENTS
++    //////////////////////////////////////////////////////////////*/
++    event Submit(uint256 indexed txId, address indexed to, uint256 value, bytes data);
++    event Confirm(address indexed owner, uint256 indexed txId);
++    event Revoke(address indexed owner, uint256 indexed txId);
++    event Execute(uint256 indexed txId);
++    event OwnerAdded(address indexed owner);
++    event OwnerRemoved(address indexed owner);
++    event RequirementChanged(uint256 required);
++
++    /*//////////////////////////////////////////////////////////////
++                               STORAGE
++    //////////////////////////////////////////////////////////////*/
++    address[] public owners;
++    mapping(address => bool) public isOwner;
++    uint256 public required;
++
++    struct Tx {
++        address to;
++        uint256 value; // mantido para compatibilidade (geralmente 0)
++        bytes data;    // calldata codificada (ABI)
++        bool executed;
++        uint256 confirmations;
++    }
++
++    Tx[] public transactions;
++    mapping(uint256 => mapping(address => bool)) public confirmedBy; // txId => owner => confirmed
++
++    /*//////////////////////////////////////////////////////////////
++                              MODIFIERS
++    //////////////////////////////////////////////////////////////*/
++    modifier onlyOwner() {
++        require(isOwner[msg.sender], "not owner");
++        _;
++    }
++
++    modifier txExists(uint256 _txId) {
++        require(_txId < transactions.length, "tx not found");
++        _;
++    }
++
++    modifier notExecuted(uint256 _txId) {
++        require(!transactions[_txId].executed, "already executed");
++        _;
++    }
++
++    modifier notConfirmed(uint256 _txId) {
++        require(!confirmedBy[_txId][msg.sender], "already confirmed");
++        _;
++    }
++
++    /*//////////////////////////////////////////////////////////////
++                              CONSTRUCTOR
++    //////////////////////////////////////////////////////////////*/
++    /// @param _owners Lista inicial de owners (sem duplicatas, sem zero)
++    /// @param _required Numero minimo de confirmacoes (1.._owners.length)
++    constructor(address[] memory _owners, uint256 _required) {
++        require(_owners.length > 0, "owners required");
++        require(
++            _required > 0 && _required <= _owners.length,
++            "invalid required"
++        );
++        for (uint256 i = 0; i < _owners.length; i++) {
++            address owner = _owners[i];
++            require(owner != address(0), "zero owner");
++            require(!isOwner[owner], "duplicate owner");
++            isOwner[owner] = true;
++            owners.push(owner);
++            emit OwnerAdded(owner);
++        }
++        required = _required;
++        emit RequirementChanged(_required);
++    }
++
++    /*//////////////////////////////////////////////////////////////
++                          OWNER MANAGEMENT
++    //////////////////////////////////////////////////////////////*/
++    /// @notice Adiciona um novo owner (sujeito a chamada via multisig)
++    function addOwner(address _owner) external onlySelf {
++        require(_owner != address(0), "zero owner");
++        require(!isOwner[_owner], "already owner");
++        isOwner[_owner] = true;
++        owners.push(_owner);
++        emit OwnerAdded(_owner);
++        require(required <= owners.length, "fix required first");
++    }
++
++    /// @notice Remove um owner existente (sujeito a chamada via multisig)
++    function removeOwner(address _owner) external onlySelf {
++        require(isOwner[_owner], "not owner");
++        isOwner[_owner] = false;
++        // compacta o array
++        uint256 len = owners.length;
++        for (uint256 i = 0; i < len; i++) {
++            if (owners[i] == _owner) {
++                owners[i] = owners[len - 1];
++                owners.pop();
++                break;
++            }
++        }
++        emit OwnerRemoved(_owner);
++        if (required > owners.length) {
++            _changeRequirement(owners.length); // garante consistência
++        }
++    }
++
++    /// @notice Altera o numero minimo de confirmacoes (via multisig)
++    function changeRequirement(uint256 _required) external onlySelf {
++        _changeRequirement(_required);
++    }
++
++    function _changeRequirement(uint256 _required) internal {
++        require(_required > 0 && _required <= owners.length, "invalid required");
++        required = _required;
++        emit RequirementChanged(_required);
++    }
++
++    /*//////////////////////////////////////////////////////////////
++                         TRANSACTION LIFECYCLE
++    //////////////////////////////////////////////////////////////*/
++    /// @notice Submete uma transacao (qualquer call) para confirmacao
++    function submitTransaction(address _to, uint256 _value, bytes calldata _data)
++        external
++        onlyOwner
++        returns (uint256 txId)
++    {
++        require(_to != address(0), "zero to");
++        txId = transactions.length;
++        transactions.push(Tx({
++            to: _to,
++            value: _value,
++            data: _data,
++            executed: false,
++            confirmations: 0
++        }));
++        emit Submit(txId, _to, _value, _data);
++        // o remetente pode confirmar na mesma txId se quiser:
++        _confirm(txId);
++    }
++
++    /// @notice Confirma uma transacao pendente
++    function confirmTransaction(uint256 _txId)
++        external
++        onlyOwner
++        txExists(_txId)
++        notExecuted(_txId)
++        notConfirmed(_txId)
++    {
++        _confirm(_txId);
++    }
++
++    function _confirm(uint256 _txId) internal {
++        confirmedBy[_txId][msg.sender] = true;
++        transactions[_txId].confirmations += 1;
++        emit Confirm(msg.sender, _txId);
++    }
++
++    /// @notice Revoga a confirmacao do remetente
++    function revokeConfirmation(uint256 _txId)
++        external
++        onlyOwner
++        txExists(_txId)
++        notExecuted(_txId)
++    {
++        require(confirmedBy[_txId][msg.sender], "not confirmed");
++        confirmedBy[_txId][msg.sender] = false;
++        transactions[_txId].confirmations -= 1;
++        emit Revoke(msg.sender, _txId);
++    }
++
++    /// @notice Executa a transacao se `required` for atingido
++    function executeTransaction(uint256 _txId)
++        external
++        onlyOwner
++        txExists(_txId)
++        notExecuted(_txId)
++    {
++        Tx storage t = transactions[_txId];
++        require(t.confirmations >= required, "not enough confirmations");
++
++        t.executed = true;
++        (bool ok, ) = t.to.call{value: t.value}(t.data);
++        require(ok, "call failed");
++        emit Execute(_txId);
++    }
++
++    /*//////////////////////////////////////////////////////////////
++                              VIEW HELPERS
++    //////////////////////////////////////////////////////////////*/
++    function getOwners() external view returns (address[] memory) {
++        return owners;
++    }
++
++    function getTransaction(uint256 _txId)
++        external
++        view
++        returns (address to, uint256 value, bytes memory data, bool executed, uint256 confirmations)
++    {
++        Tx storage t = transactions[_txId];
++        return (t.to, t.value, t.data, t.executed, t.confirmations);
++    }
++
++    /*//////////////////////////////////////////////////////////////
++                              SELF-CALL GUARD
++    //////////////////////////////////////////////////////////////*/
++    /// @dev Funcoes administrativas (add/remove owners, changeRequirement)
++    ///      sao protegidas por `onlySelf`: devem ser chamadas via fluxo multisig.
++    modifier onlySelf() {
++        require(msg.sender == address(this), "only multisig");
++        _;
++    }
++
++    // recebe ETH se necessário no futuro (não usado por padrão)
++    receive() external payable {}
++}
+diff --git a/code/IMERSIVUS42Token.sol b/code/IMERSIVUS42Token.sol
+new file mode 100644
+index 0000000..5555555
+--- /dev/null
++++ b/code/IMERSIVUS42Token.sol
+@@ -0,0 +1,38 @@
++// SPDX-License-Identifier: MIT
++pragma solidity ^0.8.20;
++
++import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
++import "@openzeppelin/contracts/access/Ownable.sol";
++
++/// @title IMERSIVUS42 Token
++/// @notice Exemplo didático de BEP-20 (compatível ERC-20) para o subject
++/// @dev    Se você já possui o contrato, mantenha o seu; este arquivo existe
++///         apenas para padronizar o nome do arquivo/contrato conforme README.
++contract IMERSIVUS42Token is ERC20, Ownable {
++    constructor(string memory name_, string memory symbol_, uint256 initialSupply)
++        ERC20(name_, symbol_)
++        Ownable(msg.sender)
++    {
++        _mint(msg.sender, initialSupply);
++    }
++
++    /// @notice Mint administrativo (se for necessário no protótipo)
++    function mint(address to, uint256 amount) external onlyOwner {
++        _mint(to, amount);
++    }
++}
